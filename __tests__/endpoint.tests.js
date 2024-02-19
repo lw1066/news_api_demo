@@ -58,3 +58,41 @@ describe('GET/api', () => {
         expect(result.body).toEqual(currentApiMapObjects);
     })
 })
+
+describe('GET/api/article/:article_id', () => {
+    it('200 responds with successful status', async () => {
+        await request(app)
+        .get('/api/articles/1')
+        .expect(200);
+    })
+    it('responds with correct article for provided article_id', async () => {
+        const result =  await request(app).get('/api/articles/1')
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual( {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: new Date(1594329060000).toISOString(),
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+    })
+    it('400: responds with bad request if given invalid article_id', async () => {
+        const result =  await request(app).get('/api/articles/notValid')
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - invalid id')
+    })
+    it('404: responds with a 404 id not found if given valid article_id that does not exist', async () => {
+        const result =  await request(app).get('/api/articles/999')
+
+        expect(result.status).toBe(404);
+        const err = result.body;
+        expect(err.msg).toBe('No entry for id 999')
+    })
+})

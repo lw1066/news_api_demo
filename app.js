@@ -1,6 +1,7 @@
 const express = require('express');
 const { getAllTopics } = require('./controllers/get-all-topics.controller');
 const { getApiMapController } = require('./controllers/get-api-map.controller');
+const { getArticleByIdController } = require('./controllers/get-article-by-id.controller');
 
 
 
@@ -12,10 +13,20 @@ app.get('/api', getApiMapController);
 
 app.get('/api/topics', getAllTopics);
 
+app.get('/api/articles/:article_id', getArticleByIdController);
+
 app.use((req, res, next) => {
     const err = new Error(`Page not found - ${req.originalUrl}`);
     err.statusCode = 404;
-    next(err)
+    next(err);
+})
+
+
+app.use((err, req, res, next) => {
+    if(err.code === '22P02') {
+        res.status(400).send({msg:'bad request - invalid id'});
+    }
+    next(err);
 })
 
 app.use((err, req, res, next) => {
