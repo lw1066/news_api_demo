@@ -1,6 +1,5 @@
 const { getApiMap } = require("../models/get-api-map.model");
 
-
 exports.getApiMapController = async (req, res, next) => {
     try {
         const apiMap = await getApiMap();
