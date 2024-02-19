@@ -4,6 +4,7 @@ const db = require('../db/connection');
 const data = require('../db/data/test-data/index');
 const seed = require('../db/seeds/seed');
 const fs = require('fs/promises');
+const { toBeSorted, toBeSortedBy } = require('jest-sorted');
 
 
 
@@ -60,13 +61,8 @@ describe('GET/api', () => {
 })
 
 describe('GET/api/article/:article_id', () => {
-    it('200 responds with successful status', async () => {
-        await request(app)
-        .get('/api/articles/1')
-        .expect(200);
-    })
-    it('responds with correct article for provided article_id', async () => {
-        const result =  await request(app).get('/api/articles/1')
+    it('200: responds with correct article for provided article_id', async () => {
+        const result =  await request(app).get('/api/articles/1');
 
         expect(result.status).toBe(200);
         expect(result.body).toEqual( {
@@ -78,21 +74,33 @@ describe('GET/api/article/:article_id', () => {
             created_at: new Date(1594329060000).toISOString(),
             votes: 100,
             article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
           });
     })
     it('400: responds with bad request if given invalid article_id', async () => {
-        const result =  await request(app).get('/api/articles/notValid')
+        const result =  await request(app).get('/api/articles/notValid');
 
         expect(result.status).toBe(400);
         const err = result.body;
-        expect(err.msg).toBe('bad request - invalid id')
+        expect(err.msg).toBe('bad request - invalid id');
     })
     it('404: responds with a 404 id not found if given valid article_id that does not exist', async () => {
-        const result =  await request(app).get('/api/articles/999')
+        const result =  await request(app).get('/api/articles/999');
 
         expect(result.status).toBe(404);
         const err = result.body;
-        expect(err.msg).toBe('No entry for id 999')
+        expect(err.msg).toBe('No entry for id 999');
+    })
+})
+
+describe('GET/api/articles', () => {
+    it('200: responds with an array of all articles without body texts, sorted in descending order by created_at', async () => {
+        const result = await request(app).get('/api/articles');
+        const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
+
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(13);
+        expect(result.body).toBeSortedBy('created_at', {descending:true});
+        expect(Object.keys(result.body[0])).toEqual(expectedColumns);
     })
 })
