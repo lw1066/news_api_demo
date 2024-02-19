@@ -1,3 +1,9 @@
-# Northcoders News API
+# news_api_demo
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+This news API demo uses a PSQL database and node-postgres. 
+
+To use it you will need to install dotenv and add a .env file for a test (.env.test) or development (.env.development) database.
+
+Both .env files need the PG database name: PGDATABASE=*your database name here* and may also need your  PG password: PGPASSWORD=*your password here*.
+
+
