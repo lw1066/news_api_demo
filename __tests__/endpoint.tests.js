@@ -3,6 +3,9 @@ const app = require('../app');
 const db = require('../db/connection');
 const data = require('../db/data/test-data/index');
 const seed = require('../db/seeds/seed');
+const fs = require('fs/promises');
+
+
 
 beforeEach(() => {
     return seed(data);
@@ -37,5 +40,21 @@ describe('GET/api/topics', () => {
             expect(topic).toHaveProperty('description');
         })
     })
-
 });
+
+
+describe('GET/api', () => {
+    it('200 responds with successful status', async () => {
+        await request(app)
+        .get('/api')
+        .expect(200);
+    })
+    it('responds with a list of current api objects', async () => {
+        const JsonData = await fs.readFile(`${__dirname}/../endpoints.json`);
+        const currentApiMapObjects = JSON.parse(JsonData);
+        const result = await request(app).get('/api');
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual(currentApiMapObjects);
+    })
+})
