@@ -7,6 +7,7 @@ const { getAllCommentsForArticleController } = require('./controllers/get-all-co
 const { postNewCommentController } = require('./controllers/post-new-comment.controller');
 const { patchArticleByIdController } = require('./controllers/patch-article_by_id.controller');
 const { deleteCommentByIdController } = require('./controllers/delete-comment-by-id.controller');
+const { getAllUsersController } = require('./controllers/get-all-users.controller');
 
 const app= express();
 
@@ -23,6 +24,8 @@ app.post('/api/articles/:article_id/comments', postNewCommentController);
 app.patch('/api/articles/:article_id', patchArticleByIdController);
 
 app.delete('/api/comments/:comment_id', deleteCommentByIdController);
+
+app.get('/api/users', getAllUsersController);
 
 app.use((req, res, next) => {
     const err = new Error(`Page not found - ${req.originalUrl}`);

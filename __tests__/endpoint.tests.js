@@ -309,3 +309,18 @@ describe('DELETE/api/comments/:comment_id', () => {
         expect(err.msg).toBe('bad request - invalid id');
     })
 })
+describe('GET/api/users', () => {
+    it('200: serves an array of all users with properties - username, name, avatar_url', async () => {
+        const result = await request(app).get('/api/users')
+
+        const { users } = result.body;
+        expect(users).toHaveLength(4);
+        users.forEach(user => {
+            expect(user).toEqual(expect.objectContaining({
+                username: expect.any(String),
+                name: expect.any(String),
+                avatar_url: expect.any(String)
+            }))
+        })
+    })
+})
