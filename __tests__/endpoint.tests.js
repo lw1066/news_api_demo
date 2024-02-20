@@ -179,16 +179,26 @@ describe('POST/api/articles/:article_id/comments', () => {
         const err = result.body;
         expect(err.msg).toBe('bad request - invalid id');
     })
-    it('400: returns bad request if userName is invalid', async () => {
+    it('404: returns not found if userName is not in db', async () => {
         const body = {
             userName: "rogerso",
             body: "I really liked this comment here."
         };
         const result = await request(app).post('/api/articles/1/comments').send(body);
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(404);
         const err = result.body;
         expect(err.msg).toBe('bad request - userName rogerso does not exist.');
+    })
+    it('400: returns bad request if given incomplete req.body to post', async () => {
+        const body = {
+            userName: "rogerso",
+        };
+        const result = await request(app).post('/api/articles/1/comments').send(body);
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - missing information');
     })
 })
 
