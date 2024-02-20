@@ -58,5 +58,21 @@
         }
       ] 
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "adds a comment to article selected by article_id and serves posted comment",
+    "example request body": {
+      "userName": "userName in db",
+      "body": "comment to post"
+    },
+    "queries": [],
+    "exampleResponse": {
+      "comment_id": 2,
+      "body": "comment to post",
+      "votes": 0,
+      "author": "userName in db",
+      "article_id": 1,
+      "created_at": 1604113380000  
+    }
   }
 }
