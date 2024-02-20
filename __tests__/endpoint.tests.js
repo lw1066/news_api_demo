@@ -109,16 +109,24 @@ describe('GET/api/articles/:article_id/comments', () => {
     it('200: responds with an array of comments with appropriate columns, sorted by created_at in descending order', async () => {
         const result = await request(app).get('/api/articles/1/comments');
         const expectedColumns = ['comment_id', 'body', 'article_id', 'author', 'votes', 'created_at'];
+        const firstComment = result.body.comments[0];
+
         expect(result.status).toBe(200);
         expect(result.body.comments).toHaveLength(11);
         expect(result.body.comments).toBeSortedBy('created_at', {descending:true});
-        expect(Object.keys(result.body.comments[0]).sort()).toEqual(expectedColumns.sort());
+        expect(Object.keys(firstComment).sort()).toEqual(expectedColumns.sort());
+        expect(typeof firstComment.comment_id).toBe('number');
+        expect(typeof firstComment.article_id).toBe('number');
+        expect(typeof firstComment.votes).toBe('number');
+        expect(typeof firstComment.body).toBe('string');
+        expect(typeof firstComment.author).toBe('string');
+        expect(typeof firstComment.body).toBe('string');
     })
-    it('204: responds with 204 and comments as undefined when given a valid article_id with no comments', async () => {
+    it('200: responds with 200 and comments as an empty array when given a valid article_id with no comments', async () => {
         const result = await request(app).get('/api/articles/2/comments');
         
-        expect(result.status).toBe(204);
-        expect(result.body.comments).toBe(undefined);
+        expect(result.status).toBe(200);
+        expect(result.body.comments).toEqual([]);
     })
     it('400: returns bad request - invalid id, when given an invalid article_id', async () => {
         const result =  await request(app).get('/api/articles/invalidId/comments');
