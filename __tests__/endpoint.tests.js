@@ -144,8 +144,8 @@ describe('GET/api/articles/:article_id/comments', () => {
     })
 })
 
-describe('POST /api/articles/:article_id/comments', () => {
-    it('200: returns posted object with provided body and votes(set to 0) + created_at + comment_id added', async () => {
+describe('POST/api/articles/:article_id/comments', () => {
+    it('201: returns posted object with provided body and votes(set to 0) + created_at + comment_id added', async () => {
         const body = {
             userName: "rogersop",
             body: "I really liked this comment here."
@@ -158,7 +158,7 @@ describe('POST /api/articles/:article_id/comments', () => {
         const timeDifference = Math.abs((now - dbNow)/1000);
 
         expect(timeDifference).toBeLessThan(6);  //allow 5ms lag
-        expect(result.status).toBe(200);
+        expect(result.status).toBe(201);
         expect(result.body).toEqual({
             comment_id: 19,
             body: 'I really liked this comment here.',
@@ -190,4 +190,90 @@ describe('POST /api/articles/:article_id/comments', () => {
         const err = result.body;
         expect(err.msg).toBe('bad request - userName rogerso does not exist.');
     })
+})
+
+describe('PATCH/api/articles/:article_id', () => {
+    it('200: returns an updated article if given an object of {inc_votes: [number of votes]}- can be a + or - number', async () => {
+        const body = {
+            inc_votes : 1
+        };
+        const body2 = {
+            inc_votes : 50
+        };
+        const body3 = {
+            inc_votes : -100
+        };
+
+        const result = await request(app).patch('/api/articles/1').send(body);
+        const result2 = await request(app).patch('/api/articles/1').send(body2);
+        const result3 = await request(app).patch('/api/articles/1').send(body3);
+
+        expect(result.body).toEqual( {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: new Date(1594329060000).toISOString(),
+            votes: 101,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        expect(result2.body).toEqual( {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: new Date(1594329060000).toISOString(),
+            votes: 151,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        expect(result3.body).toEqual( {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: new Date(1594329060000).toISOString(),
+            votes: 51,
+            article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+    })
+    it('400: returns bad request if given an object with invalid inc_votes value', async () => {
+        const body = {
+            inc_votes : 'invalid'
+        };
+
+        const result = await request(app).patch('/api/articles/1').send(body);
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - invalid id');
+    })
+    it('400: returns bad request if given an invalid article_id', async () => {
+        const body = {
+            inc_votes : 1
+        };
+
+        const result = await request(app).patch('/api/articles/invalidId').send(body);
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - invalid id');
+    })
+    it('404: returns not found if given a valid article_id that does not exist in db', async () => {
+        const body = {
+            inc_votes : 1
+        };
+
+        const result = await request(app).patch('/api/articles/999').send(body);
+
+        expect(result.status).toBe(404);
+        const err = result.body;
+        expect(err.msg).toBe('article ID 999 does not exist');
+    })
+    
 })
