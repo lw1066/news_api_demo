@@ -3,6 +3,7 @@ const { getAllTopics } = require('./controllers/get-all-topics.controller');
 const { getApiMapController } = require('./controllers/get-api-map.controller');
 const { getArticleByIdController } = require('./controllers/get-article-by-id.controller');
 const { getAllArticlesController } = require('./controllers/get-all-articles.controller');
+const { getAllCommentsForArticleController } = require('./controllers/get-all-comments-for-article.controller');
 
 const app= express();
 
@@ -14,6 +15,7 @@ app.get('/api/topics', getAllTopics);
 
 app.get('/api/articles', getAllArticlesController);
 app.get('/api/articles/:article_id', getArticleByIdController);
+app.get('/api/articles/:article_id/comments', getAllCommentsForArticleController);
 
 app.use((req, res, next) => {
     const err = new Error(`Page not found - ${req.originalUrl}`);

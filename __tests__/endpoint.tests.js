@@ -99,8 +99,40 @@ describe('GET/api/articles', () => {
         const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
 
         expect(result.status).toBe(200);
-        expect(result.body).toHaveLength(13);
-        expect(result.body).toBeSortedBy('created_at', {descending:true});
-        expect(Object.keys(result.body[0])).toEqual(expectedColumns);
+        expect(result.body.articles).toHaveLength(13);
+        expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
+        expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
     })
+})
+
+describe('GET/api/articles/:article_id/comments', () => {
+    it('200: responds with an array of comments with appropriate columns, sorted by created_at in descending order', async () => {
+        const result = await request(app).get('/api/articles/1/comments');
+        const expectedColumns = ['comment_id', 'body', 'article_id', 'author', 'votes', 'created_at'];
+        expect(result.status).toBe(200);
+        expect(result.body.comments).toHaveLength(11);
+        expect(result.body.comments).toBeSortedBy('created_at', {descending:true});
+        expect(Object.keys(result.body.comments[0]).sort()).toEqual(expectedColumns.sort());
+    })
+    it('204: responds with 204 and comments as undefined when given a valid article_id with no comments', async () => {
+        const result = await request(app).get('/api/articles/2/comments');
+        
+        expect(result.status).toBe(204);
+        expect(result.body.comments).toBe(undefined);
+    })
+    it('400: returns bad request - invalid id, when given an invalid article_id', async () => {
+        const result =  await request(app).get('/api/articles/invalidId/comments');
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - invalid id');
+    })
+    it('404: returns No article for id 999, when given an valid article_id that does not exist', async () => {
+        const result =  await request(app).get('/api/articles/888/comments');
+
+        expect(result.status).toBe(404);
+        const err = result.body;
+        expect(err.msg).toBe('No entry for id 888');
+    })
+
 })
