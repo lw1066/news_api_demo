@@ -285,5 +285,27 @@ describe('PATCH/api/articles/:article_id', () => {
         const err = result.body;
         expect(err.msg).toBe('article ID 999 does not exist');
     })
-    
+})
+describe('DELETE/api/comments/:comment_id', () => {
+    it('204: deletes given comment and returns 204 code', async () => {
+        const result = await request(app).delete('/api/comments/3');
+        
+        expect(result.status).toBe(204);
+        const deletedCheck = await db.query('SELECT * FROM comments WHERE comment_id = $1', [3]);
+        expect(deletedCheck.rows).toHaveLength(0);
+    })
+    it('404: returns not found if comment_id does not exist', async () => {
+        const result = await request(app).delete('/api/comments/888');
+
+        expect(result.status).toBe(404);
+        const err = result.body;
+        expect(err.msg).toBe('Cannot delete - comment ID 888 does not found');
+    })
+    it('400: returns bad request if comment_id is invalid', async () => {
+        const result = await request(app).delete('/api/comments/invalidID');
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - invalid id');
+    })
 })
