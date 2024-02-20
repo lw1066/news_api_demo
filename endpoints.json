@@ -93,9 +93,22 @@
       "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
     }
   },
-  "DELETE /api/comments/:comment_id": {
+  "DELETE/api/comments/:comment_id": {
     "description" : "deletes comment with given comment_id and serves 204 status code",
     "queries":[],
     "exampleResponse" : "<There is no response just a 204 success code>"
+  },
+  "GET/api/users": {
+    "description": "serves an array of all user",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "rogersop",
+          "name": "paul",
+          "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
+        }
+      ]
+    }
   }
 }
