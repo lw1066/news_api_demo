@@ -142,5 +142,52 @@ describe('GET/api/articles/:article_id/comments', () => {
         const err = result.body;
         expect(err.msg).toBe('No entry for id 888');
     })
+})
 
+describe('POST /api/articles/:article_id/comments', () => {
+    it('200: returns posted object with provided body and votes(set to 0) + created_at + comment_id added', async () => {
+        const body = {
+            userName: "rogersop",
+            body: "I really liked this comment here."
+        }
+        const result = await request(app).post('/api/articles/2/comments').send(body)
+        
+        // calculate time difference between date now and db created_at time to allow for lag. Have allowed 5ms lag in expect statement below.
+        const now = new Date();
+        const dbNow = new Date (result.body.created_at);
+        const timeDifference = Math.abs((now - dbNow)/1000);
+
+        expect(timeDifference).toBeLessThan(6);  //allow 5ms lag
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual({
+            comment_id: 19,
+            body: 'I really liked this comment here.',
+            article_id: 2,
+            author: 'rogersop',
+            votes: 0,
+            created_at: expect.any(String)       
+        });
+    })
+    it('400: returns bad request if article_id is invalid', async () => {
+        const body = {
+            userName: "rogersop",
+            body: "I really liked this comment here."
+        };
+        const result = await request(app).post('/api/articles/invalidID/comments').send(body);
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - invalid id');
+    })
+    it('400: returns bad request if userName is invalid', async () => {
+        const body = {
+            userName: "rogerso",
+            body: "I really liked this comment here."
+        };
+        const result = await request(app).post('/api/articles/1/comments').send(body);
+
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('bad request - userName rogerso does not exist.');
+    })
 })
