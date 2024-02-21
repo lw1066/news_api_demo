@@ -26,7 +26,11 @@ exports.selectAllArticles = async (topic) => {
 
     const result = await db.query(queryString, queryArray);
     if (result.rows.length === 0) {
-        return Promise.reject({statusCode: 404, message: `No articles for topic: ${topic}`});
+        const topicExists = await db.query(`SELECT * FROM topics WHERE slug=$1;`, [topic]);
+        if (!topicExists.rows[0]) {
+            return Promise.reject({statusCode: 400, message: `Bad request - Not a valid topic: ${topic}`});
+        }
+        return result.rows;
     }
     return result.rows;
 };

@@ -119,13 +119,21 @@ describe('GET/api/articles', () => {
         expect(result.body.articles).toHaveLength(1);
         expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
         expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
+        expect(result.body.articles[0].topic).toBe('cats')
     })
-    it('404: returns not found if given a topic which no articles use', async () => {
+    it('200: returns an empty array if given a valid topic which no articles use', async () => {
+        const result = await request(app).get('/api/articles?topic=paper');
+
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(0);
+        expect(result.body.articles).toBeInstanceOf(Array);
+    })
+    it('400: returns bad request if given an invalid topic', async () => {
         const result = await request(app).get('/api/articles?topic=notatopic');
 
-        expect(result.status).toBe(404);
+        expect(result.status).toBe(400);
         const err = result.body;
-        expect(err.msg).toBe('No articles for topic: notatopic');
+        expect(err.msg).toBe('Bad request - Not a valid topic: notatopic');
     })
 })
 
