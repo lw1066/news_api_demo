@@ -73,6 +73,7 @@ describe('GET/api/article/:article_id', () => {
             body: "I find this existence challenging",
             created_at: new Date(1594329060000).toISOString(),
             votes: 100,
+            comment_count: 11,
             article_img_url:
               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
           });
@@ -97,11 +98,20 @@ describe('GET/api/articles', () => {
     it('200: responds with an array of all articles without body texts, sorted in descending order by created_at', async () => {
         const result = await request(app).get('/api/articles');
         const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
+        const firstArticle = result.body.articles[0];
 
         expect(result.status).toBe(200);
         expect(result.body.articles).toHaveLength(13);
         expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
-        expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
+        expect(Object.keys(firstArticle)).toEqual(expectedColumns);
+        expect(typeof firstArticle.comment_count).toBe('number');
+        expect(typeof firstArticle.article_id).toBe('number');
+        expect(typeof firstArticle.title).toBe('string');
+        expect(typeof firstArticle.author).toBe('string');
+        expect(typeof firstArticle.votes).toBe('number');
+        expect(typeof firstArticle.topic).toBe('string');
+        expect(typeof firstArticle.created_at).toBe('string');
+        expect(typeof firstArticle.article_img_url).toBe('string');
     })
     it('200: accepts a topic query which filters articles by topic', async () => {
         const result = await request(app).get('/api/articles?topic=cats');
