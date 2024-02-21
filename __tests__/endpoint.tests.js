@@ -58,12 +58,12 @@ describe('GET/api', () => {
     })
 })
 
-describe('GET/api/article/:article_id', () => {
+describe('GET/api/articles/:article_id', () => {
     it('200: responds with correct article for provided article_id', async () => {
         const result =  await request(app).get('/api/articles/1');
 
         expect(result.status).toBe(200);
-        expect(result.body).toEqual( {
+        expect(result.body).toMatchObject({
             article_id: 1,
             title: "Living in the shadow of a great man",
             topic: "mitch",
@@ -71,24 +71,31 @@ describe('GET/api/article/:article_id', () => {
             body: "I find this existence challenging",
             created_at: new Date(1594329060000).toISOString(),
             votes: 100,
-            comment_count: 11,
             article_img_url:
               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
           });
     })
-    it('400: responds with bad request if given invalid article_id', async () => {
+    it('400: responds with bad request if given invalid article_id', async() => {
         const result =  await request(app).get('/api/articles/notValid');
 
         expect(result.status).toBe(400);
         const err = result.body;
         expect(err.msg).toBe('bad request - invalid id');
     })
-    it('404: responds with a 404 id not found if given valid article_id that does not exist', async () => {
+    it('404: responds with a 404 id not found if given valid article_id that does not exist', async() => {
         const result =  await request(app).get('/api/articles/999');
 
         expect(result.status).toBe(404);
         const err = result.body;
         expect(err.msg).toBe('No entry for id 999');
+    })
+    it('FEATURE REQUEST: response article includes comment_count', async() => {
+        const result =  await request(app).get('/api/articles/1');
+
+        expect(result.status).toBe(200);
+        expect(result.body).toMatchObject({
+           comment_count: 11
+          });
     })
 })
 
@@ -111,7 +118,7 @@ describe('GET/api/articles', () => {
         expect(typeof firstArticle.created_at).toBe('string');
         expect(typeof firstArticle.article_img_url).toBe('string');
     })
-    it('200: accepts a topic query which filters articles by topic', async () => {
+    it('FEATURE REQUEST: 200: accepts a topic query which filters articles by topic', async () => {
         const result = await request(app).get('/api/articles?topic=cats');
         const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
 
