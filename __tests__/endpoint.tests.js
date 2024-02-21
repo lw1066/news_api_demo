@@ -50,7 +50,7 @@ describe('GET/api', () => {
         .get('/api')
         .expect(200);
     })
-    it('responds with a list of current api objects', async () => {
+    it('200: responds with a list of current api objects', async () => {
         const JsonData = await fs.readFile(`${__dirname}/../endpoints.json`);
         const currentApiMapObjects = JSON.parse(JsonData);
         const result = await request(app).get('/api');
@@ -102,6 +102,22 @@ describe('GET/api/articles', () => {
         expect(result.body.articles).toHaveLength(13);
         expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
         expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
+    })
+    it('200: accepts a topic query which filters articles by topic', async () => {
+        const result = await request(app).get('/api/articles?topic=cats');
+        const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
+
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(1);
+        expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
+        expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
+    })
+    it('404: returns not found if given a topic which no articles use', async () => {
+        const result = await request(app).get('/api/articles?topic=notatopic');
+
+        expect(result.status).toBe(404);
+        const err = result.body;
+        expect(err.msg).toBe('No articles for topic: notatopic');
     })
 })
 
