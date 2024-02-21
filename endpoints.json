@@ -11,7 +11,7 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles without their body texts sorted in descending date order",
-    "queries": [],
+    "queries": [{"topic": "filters articles by topic column"}],
     "exampleResponse": {
       "articles": [
         {
