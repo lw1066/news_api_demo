@@ -3,17 +3,17 @@ const db = require('../db/connection');
 exports.selectAllArticles = async (topic) => {
 
     const queryArray = [];
-    let queryString = `SELECT articles.article_id, 
-            articles.title, 
-            articles.topic, 
-            articles.author, 
-            articles.created_at, 
-            articles.votes, 
-            articles.article_img_url, 
-            COUNT(comments.article_id) AS comment_count 
-        FROM articles 
-        LEFT JOIN comments 
-        ON articles.article_id = comments.article_id`;
+    let queryString = `SELECT a.article_id, 
+            a.title, 
+            a.topic, 
+            a.author, 
+            a.created_at, 
+            a.votes, 
+            a.article_img_url, 
+            COUNT(c.article_id)::INTEGER AS comment_count 
+        FROM articles a
+        LEFT JOIN comments c
+        ON a.article_id = c.article_id`;
 
     if(topic) {
         queryString += ` WHERE topic = $1`;
@@ -21,14 +21,8 @@ exports.selectAllArticles = async (topic) => {
     }
 
     queryString += ` GROUP BY 
-            articles.article_id, 
-            articles.title, 
-            articles.topic, 
-            articles.author, 
-            articles.created_at, 
-            articles.votes, 
-            articles.article_img_url
-        ORDER BY articles.created_at DESC;`;
+            a.article_id
+        ORDER BY a.created_at DESC;`;
 
     const result = await db.query(queryString, queryArray);
     if (result.rows.length === 0) {

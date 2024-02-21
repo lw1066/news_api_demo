@@ -7,7 +7,6 @@ const fs = require('fs/promises');
 const { toBeSorted, toBeSortedBy } = require('jest-sorted');
 
 
-
 beforeEach(() => {
     return seed(data);
 });
@@ -42,7 +41,6 @@ describe('GET/api/topics', () => {
         })
     })
 });
-
 
 describe('GET/api', () => {
     it('200 responds with successful status', async () => {
