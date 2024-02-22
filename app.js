@@ -1,31 +1,10 @@
 const express = require('express');
-const { getAllTopics } = require('./controllers/get-all-topics.controller');
-const { getApiMapController } = require('./controllers/get-api-map.controller');
-const { getArticleByIdController } = require('./controllers/get-article-by-id.controller');
-const { getAllArticlesController } = require('./controllers/get-all-articles.controller');
-const { getAllCommentsForArticleController } = require('./controllers/get-all-comments-for-article.controller');
-const { postNewCommentController } = require('./controllers/post-new-comment.controller');
-const { patchArticleByIdController } = require('./controllers/patch-article_by_id.controller');
-const { deleteCommentByIdController } = require('./controllers/delete-comment-by-id.controller');
-const { getAllUsersController } = require('./controllers/get-all-users.controller');
-
 const app= express();
+const apiRouter = require('./routes/api-router');
 
 app.use(express.json());
 
-app.get('/api', getApiMapController);
-
-app.get('/api/topics', getAllTopics);
-
-app.get('/api/articles', getAllArticlesController);
-app.get('/api/articles/:article_id', getArticleByIdController);
-app.get('/api/articles/:article_id/comments', getAllCommentsForArticleController);
-app.post('/api/articles/:article_id/comments', postNewCommentController);
-app.patch('/api/articles/:article_id', patchArticleByIdController);
-
-app.delete('/api/comments/:comment_id', deleteCommentByIdController);
-
-app.get('/api/users', getAllUsersController);
+app.use('/', apiRouter);
 
 app.use((req, res, next) => {
     const err = new Error(`Page not found - ${req.originalUrl}`);
