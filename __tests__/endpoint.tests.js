@@ -118,30 +118,84 @@ describe('GET/api/articles', () => {
         expect(typeof firstArticle.created_at).toBe('string');
         expect(typeof firstArticle.article_img_url).toBe('string');
     })
-    it('FEATURE REQUEST: 200: accepts a topic query which filters articles by topic', async () => {
-        const result = await request(app).get('/api/articles?topic=cats');
-        const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
-
-        expect(result.status).toBe(200);
-        expect(result.body.articles).toHaveLength(1);
-        expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
-        expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
-        expect(result.body.articles[0].topic).toBe('cats')
-    })
     it('200: returns an empty array if given a valid topic which no articles use', async () => {
         const result = await request(app).get('/api/articles?topic=paper');
-
+        
         expect(result.status).toBe(200);
         expect(result.body.articles).toHaveLength(0);
         expect(result.body.articles).toBeInstanceOf(Array);
     })
     it('400: returns bad request if given an invalid topic', async () => {
         const result = await request(app).get('/api/articles?topic=notatopic');
-
+        
         expect(result.status).toBe(400);
         const err = result.body;
         expect(err.msg).toBe('Bad request - Not a valid topic: notatopic');
     })
+    it('FEATURE REQUEST: 200: accepts a topic query which filters articles by topic', async () => {
+        const result = await request(app).get('/api/articles?topic=cats');
+        const expectedColumns = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'];
+    
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(1);
+        expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
+        expect(Object.keys(result.body.articles[0])).toEqual(expectedColumns);
+        expect(result.body.articles[0].topic).toBe('cats')
+    })   
+})
+describe('FEATURE REQUEST: order query', () => {
+    it('defaults to descending(DESC)', async () => {
+        const result = await request(app).get('/api/articles');
+      
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(13);
+        expect(result.body.articles).toBeSortedBy('created_at', {descending:true})
+    })
+    it('accepts ascending(ASC) - not case sensitive', async () => {
+        const result = await request(app).get('/api/articles?order=asc');
+      
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(13);
+        expect(result.body.articles).toBeSortedBy('created_at', {descending:false})
+    })
+    it('400: returns an error if given any other value for order query', async () => {
+        const result = await request(app).get('/api/articles?order=notValid');
+      
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('Bad request - Not a valid order query: notValid');
+    })
+})
+describe('FEATURE REQUEST: sort_by query', () => {
+    it('defaults to created_at column', async () => {
+        const result = await request(app).get('/api/articles');
+      
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(13);
+        expect(result.body.articles).toBeSortedBy('created_at', {descending:true});
+    })
+    it('accepts any other valid column to sort_by', async () => {
+        const result = await request(app).get('/api/articles?sort_by=title');
+      
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(13);
+        expect(result.body.articles).toBeSortedBy('title', {descending:true});
+    })
+    it('400: returns error if given invalid column to sort_by', async () => {
+        const result = await request(app).get('/api/articles?sort_by=notValid');
+      
+        expect(result.status).toBe(400);
+        const err = result.body;
+        expect(err.msg).toBe('Bad request - Not a valid column to sort by: notValid');
+    })
+    it('can be used with order ASC', async () => {
+        const result = await request(app).get('/api/articles?sort_by=title&order=ASC');
+      
+        expect(result.status).toBe(200);
+        expect(result.body.articles).toHaveLength(13);
+        expect(result.body.articles).toBeSortedBy('title', {descending:false});;
+    })
+    
 })
 
 describe('GET/api/articles/:article_id/comments', () => {
@@ -363,3 +417,4 @@ describe('GET/api/users', () => {
         })
     })
 })
+
