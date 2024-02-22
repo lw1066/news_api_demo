@@ -1,6 +1,15 @@
 const db = require('../db/connection');
 
-exports.selectAllArticles = async (topic) => {
+exports.selectAllArticles = async (topic, sort_by='created_at', order='DESC') => {
+
+if(!['ASC', 'DESC'].includes(order.toUpperCase())) {
+    return Promise.reject({statusCode: 400, message: `Bad request - Not a valid order query: ${order}`});
+}
+
+if(!['article_id', 'title', 'topic', 'author', 'created_at', 'votes', 'article_img_url', 'comment_count'].includes(sort_by.toLowerCase())) {
+    return Promise.reject({statusCode: 400, message: `Bad request - Not a valid column to sort by: ${sort_by}`});
+}
+
 
     const queryArray = [];
     let queryString = `SELECT a.article_id, 
@@ -22,7 +31,7 @@ exports.selectAllArticles = async (topic) => {
 
     queryString += ` GROUP BY 
             a.article_id
-        ORDER BY a.created_at DESC;`;
+        ORDER BY ${sort_by} ${order}`;
 
     const result = await db.query(queryString, queryArray);
     if (result.rows.length === 0) {
