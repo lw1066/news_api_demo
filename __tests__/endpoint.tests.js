@@ -403,7 +403,7 @@ describe('DELETE/api/comments/:comment_id', () => {
     })
 })
 describe('GET/api/users', () => {
-    it('200: serves an array of all users with properties - username, name, avatar_url', async () => {
+    it('200: returns an array of all users with properties - username, name, avatar_url', async () => {
         const result = await request(app).get('/api/users')
 
         const { users } = result.body;
@@ -417,4 +417,23 @@ describe('GET/api/users', () => {
         })
     })
 })
+describe('PATCH/api/comments/:comment_id', () => {
+    it('200: returns comment object with vote property updated by amount provided by inc_votes', async () => {
+        const body = { inc_votes : 1 }
+        const body2 = { inc_votes : -10 }
+        const result = await request(app).patch('/api/comments/7').send(body)
+        const result2 = await request(app).patch('/api/comments/7').send(body2)
 
+        expect(result.body).toEqual(expect.objectContaining({ votes: 1 }))
+        expect(result2.body).toEqual(expect.objectContaining({ votes: -9 }))
+    })
+    it('400: returns bad request if given a bad or empty body ', async () => {
+        const body = { inc_votes : 'notvalid' }
+        const body2 = { }
+        const result = await request(app).patch('/api/comments/7').send(body)
+        const result2 = await request(app).patch('/api/comments/7').send(body2)
+
+        expect(result.body).toEqual(expect.objectContaining({ "msg": "bad request - invalid vote value: notvalid" }))
+        expect(result2.body).toEqual(expect.objectContaining({"msg": "bad request - missing information" }))
+    })
+})

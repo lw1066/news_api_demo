@@ -96,8 +96,21 @@
   },
   "DELETE/api/comments/:comment_id": {
     "description" : "deletes comment with given comment_id and serves 204 status code",
-    "queries":[],
     "exampleResponse" : "<There is no response just a 204 success code>"
+  },
+  "PATCH/api/comments/:comment_id": {
+    "description": "changes votes on selected comment by amount inc_votes, can be (+) or (-) then serves updated comment.",
+    "exampleRequestBody": {
+      "inc_votes": 3
+    },
+    "exampleResponse" : {
+      "comment_id": 2,
+      "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+      "votes": 14,
+      "author": "butter_bridge",
+      "article_id": 1,
+      "created_at": "2020-07-09T21:11:00.000Z"  
+    }
   },
   "GET/api/users": {
     "description": "serves an array of all user",

@@ -14,10 +14,10 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
     if(err.code === '22P02') {
-        res.status(400).send({msg:'bad request - invalid id'});
+        res.status(400).send({msg: err.msg ||'bad request - invalid id'});
     }
     if(err.code === '23503') {
-        res.status(404).send({msg: `bad request - ${err.detail}`})
+        res.status(404).send({msg: err.msg || `bad request - ${err.detail}`})
     }
     if(err.code === '23502') {
         res.status(400).send({msg: `bad request - missing information`})
