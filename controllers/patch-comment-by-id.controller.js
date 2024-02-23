@@ -4,7 +4,6 @@ const { updateCommentById } = require("../models/update-comment-by-id.model");
 exports.patchCommentByIdController = async (req, res, next) => {
     const updateData = req.body;
     const { comment_id } = req.params;
-    console.log(comment_id)
     try{
         const result = await updateCommentById(comment_id, updateData);
         res.status(200).send(result);
