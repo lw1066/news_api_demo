@@ -413,8 +413,28 @@ describe('GET/api/users', () => {
                 username: expect.any(String),
                 name: expect.any(String),
                 avatar_url: expect.any(String)
-            }))
+            }));
         })
+    })
+})
+describe('GET/api/users/:username', () => {
+    it('200: serves a user object of provided :username with properties - username, avatar_url + name', async () => {
+        const result = await request(app).get('/api/users/lurker');
+
+        const user = result.body;
+        expect(user).toEqual(expect.objectContaining({
+            username: 'lurker',
+            name: 'do_nothing',
+            avatar_url:
+                'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
+        }));
+    })
+    it('404: returns not found if a non-existent username is entered', async () => {
+        const result = await request(app).get('/api/users/notauser');
+
+        expect(result.status).toBe(404);
+        const err = result.body;
+        expect(err.msg).toBe('No user for username notauser');
     })
 })
 describe('PATCH/api/comments/:comment_id', () => {
