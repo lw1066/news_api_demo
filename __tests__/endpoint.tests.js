@@ -243,14 +243,8 @@ describe('POST/api/articles/:article_id/comments', () => {
             userName: "rogersop",
             body: "I really liked this comment here."
         }
-        const result = await request(app).post('/api/articles/2/comments').send(body)
-        
-        // calculate time difference between date now and db created_at time to allow for lag. Have allowed 5ms lag in expect statement below.
-        const now = new Date();
-        const dbNow = new Date (result.body.created_at);
-        const timeDifference = Math.abs((now - dbNow)/1000);
+        const result = await request(app).post('/api/articles/2/comments').send(body);
 
-        expect(timeDifference).toBeLessThan(6);  //allow 5ms lag
         expect(result.status).toBe(201);
         expect(result.body).toEqual({
             comment_id: 19,
@@ -260,6 +254,7 @@ describe('POST/api/articles/:article_id/comments', () => {
             votes: 0,
             created_at: expect.any(String)       
         });
+        expect(result.body.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     })
     it('400: returns bad request if article_id is invalid', async () => {
         const body = {
@@ -281,7 +276,7 @@ describe('POST/api/articles/:article_id/comments', () => {
 
         expect(result.status).toBe(404);
         const err = result.body;
-        expect(err.msg).toBe('bad request - userName rogerso does not exist.');
+        expect(err.msg).toBe("provided details not found");
     })
     it('400: returns bad request if given incomplete req.body to post', async () => {
         const body = {
@@ -455,5 +450,116 @@ describe('PATCH/api/comments/:comment_id', () => {
 
         expect(result.body).toEqual(expect.objectContaining({ "msg": "bad request - invalid vote value: notvalid" }))
         expect(result2.body).toEqual(expect.objectContaining({"msg": "bad request - missing information" }))
+    })
+})
+describe('POST/api/articles', () => {
+    it('200: returns a new article with all relevant fields when given a correct body', async () => {
+        const body = {
+            author: 'rogersop',
+            title: 'boating for boys', 
+            body: 'Boats are fun but can be difficult to clean.',
+            topic: 'paper',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+        const result = await request(app).post('/api/articles').send(body);
+
+        expect(result.body).toMatchObject({
+            author: 'rogersop',
+            title: 'boating for boys', 
+            body: 'Boats are fun but can be difficult to clean.',
+            topic: 'paper',
+            article_id: 14,
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: 0,
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        })
+        expect(result.body.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    })
+    it('400: returns bad request if title or body are missing/blank/undefined in req.body', async () => {
+        const body = {
+            author: 'rogersop',
+            title: 'boating for boys', 
+            body: '',
+            topic: 'paper',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+        const body2 = {
+            author: 'rogersop',
+            title: 'boating for boys', 
+            body: undefined,
+            topic: 'paper',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+        const body3 = {
+            author: 'rogersop',
+            title: 'boating for boys', 
+            topic: 'paper',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+
+
+        const result = await request(app).post('/api/articles').send(body);
+        const result2 = await request(app).post('/api/articles').send(body2);
+        const result3 = await request(app).post('/api/articles').send(body3);
+
+        expect(result.status).toBe(400);
+        expect(result.body.msg).toBe("body or title can't be empty");
+        expect(result2.status).toBe(400);
+        expect(result2.body.msg).toBe("bad request - missing information");
+        expect(result3.status).toBe(400);
+        expect(result3.body.msg).toBe("bad request - missing information");
+
+    })
+    it('404: returns not found if author or topic are not in db', async () => {
+        const body = {
+            author: 'unknownPerson',
+            title: 'boating for boys', 
+            body: 'Boats are fun but can be difficult to clean.',
+            topic: 'paper',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+        const body2 = {
+            author: 'rogersop',
+            title: 'boating for boys', 
+            body: 'paper boats are the best boats',
+            topic: 'unknownTopic',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+        const result = await request(app).post('/api/articles').send(body);
+        const result2 = await request(app).post('/api/articles').send(body2);
+
+        expect(result.status).toBe(404);
+        expect(result.body.msg).toBe('provided details not found');
+        expect(result2.status).toBe(404);
+        expect(result2.body.msg).toBe("provided details not found");
+    })
+    it('400: returns bad request if author or topic are missing from req.body', async () => {
+        const body = {
+            title: 'boating for boys', 
+            body: 'Boats are fun but can be difficult to clean.',
+            topic: 'paper',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+        const body2 = {
+            author: 'rogersop',
+            title: 'boating for boys', 
+            body: 'paper boats are the best boats',
+            article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+
+        const result = await request(app).post('/api/articles').send(body);
+        const result2 = await request(app).post('/api/articles').send(body2);
+        
+        expect(result.status).toBe(400);
+        expect(result.body.msg).toBe("bad request - missing information");
+        expect(result2.status).toBe(400);
+        expect(result2.body.msg).toBe("bad request - missing information");
+
     })
 })
